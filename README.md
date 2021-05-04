@@ -1,0 +1,2 @@
+# Description
+This repository is compilation of example of rust code according to *[The Rust Programming Language book](https://doc.rust-lang.org/book/title-page.html)* with some adjustments and tweaks of my own.
