@@ -18,6 +18,8 @@ impl Config {
             return Err("Too Many Arguments");
         }
 
+
+        // Noted: Clone operation do take some performace but in this case args is very small, So its didnt matter much.
         let query = args[1].clone();
         let filename = args[2].clone();
         //let mut case_sentitive: bool;
