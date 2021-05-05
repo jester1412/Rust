@@ -1,43 +1,52 @@
 use std::thread;
 use std::time::Duration;
+use std::collections::HashMap;
+use std::hash::Hash;
+//use std::clone::Clone;
 
-struct Cacher<T,K>
+struct Cacher<T,K,J>
 where
     // Closure Trait Fn
-    T: Fn(K) -> K,
-    K: Copy,
+    T: Fn(K) -> J,
+    K: Copy + Eq + Hash,
+    J: Clone + Copy,
 {
     calculation: T,
     // value need to be option because we can have value or no value
-    value: Option<K>,
+    value: HashMap<K,J>,
 }
 
-impl<T,K> Cacher<T,K>
+impl<T,K,J> Cacher<T,K,J>
 where
-    T: Fn(K) -> K,
-    K: Copy
+    T: Fn(K) -> J,
+    K: Copy + Eq + Hash,
+    J: Clone + Copy
 {
     // Generate Empty Struct Cacher
-    fn new(calculation: T) -> Cacher<T,K> {
+    fn new(calculation: T) -> Cacher<T,K,J> {
         Cacher {
             calculation,
-            value: None,
+            value: HashMap::new(),
         }
     }
     // With this value logic we cannot have 2 differnce value because when we have some value it will return that value
     // and if we have 2 value it will return only first value in logic
-    // TODO : Fix value logic to store more than 1 value, use Hashmap
+    // TODO -> Done : Fix value logic to store more than 1 value, use Hashmap
     // Done : Fix value type to generic type
-    fn value(&mut self, arg: K) -> K {
-        match self.value {
-            Some(v) => v,
-            None => {
-                let v = (self.calculation)(arg);
-                self.value = Some(v);
-                v
-            }
+    fn value(&mut self, arg: K) -> J {
+        // get new Cacher
+        let c = &self.calculation;
+        // TODO : Explain the line below
+        *self.value.entry(arg).or_insert_with(|| (c)(arg))
         }
-    }
+        //match self.value {
+        //    Some(v) => v,
+        //    None => {
+        //        let v = (self.calculation)(arg);
+        //        self.value = Some(v);
+        //        v
+        //    }
+        //}
 }
 
 
@@ -140,4 +149,14 @@ fn main() {
     let simulated_random_number = 7;
 
     generate_workout(simulated_user_specified_value, simulated_random_number);
+}
+
+#[test]
+fn call_with_different_values() {
+    let mut c = Cacher::new(|a| a);
+
+    let v1 = c.value(1);
+    let v2 = c.value(2);
+
+    assert_eq!(v2, 2);
 }
