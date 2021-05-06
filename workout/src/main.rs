@@ -158,5 +158,7 @@ fn call_with_different_values() {
     let v1 = c.value(1);
     let v2 = c.value(2);
 
+    assert_ne!(v1, 2);
     assert_eq!(v2, 2);
+    
 }
